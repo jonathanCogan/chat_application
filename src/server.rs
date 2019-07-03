@@ -1,33 +1,38 @@
 use std::thread;
 use std::net::{TcpListener, TcpStream, SocketAddrV4};
 use std::sync::mpsc;
-use std::io::prelude::*;
+use std::io::{self, prelude::*};
 
 enum BcMsg {
     NewUser(mpsc::Sender<String>),
     Broadcast(String),
 }
 
-pub fn run(address: SocketAddrV4) {
-    let listener = TcpListener::bind(address).unwrap();
+pub fn run(address: SocketAddrV4) -> io::Result<()> {
+    let listener = TcpListener::bind(address)?;
     let (bc_sender, bc_receiver) = mpsc::channel();
     thread::spawn(|| {
         handle_broadcast(bc_receiver);
     });
 
     for stream in listener.incoming() {
-        let write_stream = stream.unwrap();
-        let read_stream = write_stream.try_clone().unwrap();
+        let write_stream = stream?;
+        let read_stream = write_stream.try_clone()?;
         let bc_sender_clone = bc_sender.clone();
         let (th_sender, th_receiver) = mpsc::channel();
         thread::spawn(|| {
             read_from_client(read_stream, bc_sender_clone);
         });
+
         thread::spawn(|| {
             write_to_client(write_stream, th_receiver);
         });
-        bc_sender.send(BcMsg::NewUser(th_sender)).unwrap();
+
+        bc_sender.send(BcMsg::NewUser(th_sender))
+            .expect("channel is never closed");
     }
+
+    unreachable!("ALWAYS LISTENING")
 }
 
 fn read_from_client(mut read_stream: TcpStream, bc_sender: mpsc::Sender<BcMsg>) {

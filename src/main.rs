@@ -27,6 +27,7 @@ mod client;
 
 use structopt::StructOpt;
 use std::net::SocketAddrV4;
+use std::io;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "chat", about = "A chat application")]
@@ -44,11 +45,11 @@ struct Opt {
 /// let x = 3;
 /// ```
 // Goodbye!
-fn main() {
+fn main() -> io::Result<()> {
     let opt = Opt::from_args();
     if opt.name == "server" {
-        server::run(opt.address);
+        server::run(opt.address)
     } else {
-        client::run(opt.name, opt.address);
+        client::run(opt.name, opt.address)
     }
 }

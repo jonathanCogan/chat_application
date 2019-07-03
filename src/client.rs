@@ -1,24 +1,24 @@
 use std::thread;
-use std::io;
-use std::io::prelude::*;
+use std::io::{self, prelude::*};
 use std::net::{TcpStream, SocketAddrV4};
 use std::char;
 
-pub fn run(name: String, address: SocketAddrV4) {
-    let mut write_stream = TcpStream::connect(address)
-        .expect("Could not connect to server!");
-    let read_stream = write_stream.try_clone().unwrap();
+pub fn run(name: String, address: SocketAddrV4) -> io::Result<()> {
+    let mut write_stream = TcpStream::connect(address)?;
+    let read_stream = write_stream.try_clone()?;
     let name_copy = name.clone();
     thread::spawn(|| {
         read_from_server(read_stream, name_copy);
     });
 
-    //listen to stdin for new messages
+    // listen to stdin for new messages
     for line in io::stdin().lock().lines() {
-        let line = line.unwrap();
+        let line = line?;
         let line = format!("{}: {}", name, line);
-        write_stream.write(line.as_bytes()).unwrap();
+        write_stream.write(line.as_bytes())?;
     }
+
+    unreachable!("stdin closed!?")
 }
 
 fn read_from_server(mut read_stream: TcpStream, name: String) {
