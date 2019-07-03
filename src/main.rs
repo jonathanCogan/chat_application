@@ -27,6 +27,7 @@ mod client;
 
 use structopt::StructOpt;
 use std::net::SocketAddrV4;
+use std::sync::mpsc;
 use std::io;
 
 #[derive(Debug, StructOpt)]
@@ -37,6 +38,13 @@ struct Opt {
     address: SocketAddrV4,
 }
 
+#[derive(Debug)]
+pub enum Error {
+    Io(io::Error),
+    MsgSend(mpsc::SendError<server::BcMsg>)
+}
+
+
 /// Hello!
 ///
 /// **This is code!**
@@ -45,7 +53,7 @@ struct Opt {
 /// let x = 3;
 /// ```
 // Goodbye!
-fn main() -> io::Result<()> {
+fn main() -> Result<(), Error> {
     let opt = Opt::from_args();
     if opt.name == "server" {
         server::run(opt.address)

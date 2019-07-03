@@ -3,7 +3,9 @@ use std::io::{self, prelude::*};
 use std::net::{TcpStream, SocketAddrV4};
 use std::char;
 
-pub fn run(name: String, address: SocketAddrV4) -> io::Result<()> {
+use crate::Error;
+
+pub fn run(name: String, address: SocketAddrV4) -> Result<(), Error> {
     let mut write_stream = TcpStream::connect(address)?;
     let read_stream = write_stream.try_clone()?;
     let name_copy = name.clone();

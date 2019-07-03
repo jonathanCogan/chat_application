@@ -3,12 +3,27 @@ use std::net::{TcpListener, TcpStream, SocketAddrV4};
 use std::sync::mpsc;
 use std::io::{self, prelude::*};
 
-enum BcMsg {
+use crate::Error;
+
+pub enum BcMsg {
     NewUser(mpsc::Sender<String>),
     Broadcast(String),
 }
 
-pub fn run(address: SocketAddrV4) -> io::Result<()> {
+impl From<io::Error> for Error {
+    fn from(e: io::Error) -> Self {
+        Error::Io(e)
+    }
+}
+
+impl From<mpsc::SendError<BcMsg>> for Error {
+    fn from(e: mpsc::SendError<BcMsg>) -> Self {
+        Error::MsgSend(e)
+    }
+}
+
+
+pub fn run(address: SocketAddrV4) -> Result<(), Error> {
     let listener = TcpListener::bind(address)?;
     let (bc_sender, bc_receiver) = mpsc::channel();
     thread::spawn(|| {
@@ -28,8 +43,7 @@ pub fn run(address: SocketAddrV4) -> io::Result<()> {
             write_to_client(write_stream, th_receiver);
         });
 
-        bc_sender.send(BcMsg::NewUser(th_sender))
-            .expect("channel is never closed");
+        bc_sender.send(BcMsg::NewUser(th_sender))?;
     }
 
     unreachable!("ALWAYS LISTENING")
