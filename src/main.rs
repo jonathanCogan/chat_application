@@ -2,8 +2,6 @@
 //!
 //! THis is my crate.
 
-use std::env;
-
 mod server;
 mod client;
 
@@ -27,6 +25,14 @@ mod client;
 //                           |  ^                       |
 // stdout <---- thread2 <----|  |------ s_thread2 <-----|
 
+use structopt::StructOpt;
+
+#[derive(Debug, StructOpt)]
+#[structopt(name = "chat", about = "A chat application")]
+struct Opt {
+    name: String
+}
+
 /// Hello!
 ///
 /// **This is code!**
@@ -36,16 +42,11 @@ mod client;
 /// ```
 // Goodbye!
 pub fn main() {
-    let args: Vec<String> = env::args().collect();
-    if args.len() < 2 {
-        panic!("not enough arguments, name must be specified");
-    }
-
-    let name = &args[1];
-    if name == "server" {
+    let opt = Opt::from_args();
+    if opt.name == "server" {
         server::run();
     } else {
-        client::run(name.to_string());
+        client::run(opt.name);
     }
 }
 
