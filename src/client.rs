@@ -25,7 +25,7 @@ pub fn run(name: String, address: SocketAddrV4) -> Result<(), Error> {
 
 fn read_from_server(mut read_stream: TcpStream, name: String) {
     loop {
-        let mut buffer = [0;128];
+        let mut buffer = [0; 128];
         if let Ok(_) = read_stream.read(&mut buffer) {
             print_message(buffer, name.as_str());
         } else {
@@ -38,7 +38,7 @@ fn read_from_server(mut read_stream: TcpStream, name: String) {
 // takes in a u8 buffer and checks to see if it is empty by looking
 // at the first char (there is probably a better way to do this) and
 // prints the string if it is not empty.
-fn print_message(buffer: [u8;128], name: &str) {
+fn print_message(buffer: [u8; 128], name: &str) {
     let message = format!("{}",String::from_utf8_lossy(&buffer[..]));
     if message.chars().next().unwrap() != char::from_u32(0).unwrap()
         && !message.as_str().starts_with(name)

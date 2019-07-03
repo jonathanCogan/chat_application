@@ -38,10 +38,12 @@ pub fn run(address: SocketAddrV4) -> Result<(), Error> {
 
 fn read_from_client(mut read_stream: TcpStream, bc_sender: mpsc::Sender<BcMsg>) {
     loop {
-        let mut buffer = [0;128];
+        // TODO: Use `BufReader` and `read_line`.
+        // TODO: Notify other side of closed connection for graceful shutdown.
+        let mut buffer = [0; 128];
         if let Ok(_) = read_stream.read(&mut buffer) {
             let message = String::from_utf8_lossy(&buffer[..]).to_string();
-            bc_sender.send(BcMsg::Broadcast(message)).unwrap();
+            bc_sender.send(BcMsg::Broadcast(message)).expect("bc_sender");
         } else {
             println!("lost tcp connection to client");
             break;
@@ -52,7 +54,10 @@ fn read_from_client(mut read_stream: TcpStream, bc_sender: mpsc::Sender<BcMsg>) 
 fn write_to_client(mut write_stream: TcpStream, bc_receiver: mpsc::Receiver<String>) {
     loop {
         if let Ok(message) = bc_receiver.recv() {
-            write_stream.write(message.as_bytes()).unwrap();
+            if write_stream.write(message.as_bytes()).is_err() {
+                println!("lost connection to bc thread");
+                break;
+            }
         } else {
             println!("lost connection to bc thread");
             break;

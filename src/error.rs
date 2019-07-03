@@ -20,4 +20,3 @@ impl From<mpsc::SendError<BcMsg>> for Error {
         Error::MsgSend(e)
     }
 }
-
