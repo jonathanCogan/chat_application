@@ -4,6 +4,7 @@
 
 mod server;
 mod client;
+mod error;
 
 // This blocking implementation of our messaging app is probably
 // more efficient than a non-blocking one, however it comes with
@@ -27,8 +28,6 @@ mod client;
 
 use structopt::StructOpt;
 use std::net::SocketAddrV4;
-use std::sync::mpsc;
-use std::io;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "chat", about = "A chat application")]
@@ -38,13 +37,6 @@ struct Opt {
     address: SocketAddrV4,
 }
 
-#[derive(Debug)]
-pub enum Error {
-    Io(io::Error),
-    MsgSend(mpsc::SendError<server::BcMsg>)
-}
-
-
 /// Hello!
 ///
 /// **This is code!**
@@ -53,7 +45,7 @@ pub enum Error {
 /// let x = 3;
 /// ```
 // Goodbye!
-fn main() -> Result<(), Error> {
+fn main() -> Result<(), error::Error> {
     let opt = Opt::from_args();
     if opt.name == "server" {
         server::run(opt.address)

@@ -3,7 +3,7 @@ use std::io::{self, prelude::*};
 use std::net::{TcpStream, SocketAddrV4};
 use std::char;
 
-use crate::Error;
+use crate::error::Error;
 
 pub fn run(name: String, address: SocketAddrV4) -> Result<(), Error> {
     let mut write_stream = TcpStream::connect(address)?;

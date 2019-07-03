@@ -1,27 +1,14 @@
 use std::thread;
 use std::net::{TcpListener, TcpStream, SocketAddrV4};
 use std::sync::mpsc;
-use std::io::{self, prelude::*};
+use std::io::prelude::*;
 
-use crate::Error;
+use crate::error::Error;
 
 pub enum BcMsg {
     NewUser(mpsc::Sender<String>),
     Broadcast(String),
 }
-
-impl From<io::Error> for Error {
-    fn from(e: io::Error) -> Self {
-        Error::Io(e)
-    }
-}
-
-impl From<mpsc::SendError<BcMsg>> for Error {
-    fn from(e: mpsc::SendError<BcMsg>) -> Self {
-        Error::MsgSend(e)
-    }
-}
-
 
 pub fn run(address: SocketAddrV4) -> Result<(), Error> {
     let listener = TcpListener::bind(address)?;
