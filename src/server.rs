@@ -42,7 +42,7 @@ fn read_from_client(mut read_stream: TcpStream, bc_sender: mpsc::Sender<BcMsg>) 
         // TODO: Notify other side of closed connection for graceful shutdown.
         let mut buffer = [0; 128];
         if let Ok(_) = read_stream.read(&mut buffer) {
-            let message = String::from_utf8_lossy(&buffer[..]).to_string();
+            let message = String::from_utf8_lossy(&buffer).to_string();
             bc_sender.send(BcMsg::Broadcast(message)).expect("bc_sender");
         } else {
             println!("lost tcp connection to client");
@@ -78,7 +78,7 @@ fn handle_broadcast(receiver: mpsc::Receiver<BcMsg>) {
                     }
                 });
             },
-            Err(_) => panic!("error receiving in bc thread"),
+            Err(e) => eprintln!("Error: {}", e)
         }
     }
 }
