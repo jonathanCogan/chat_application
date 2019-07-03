@@ -13,8 +13,9 @@ pub fn run() {
     let listener = TcpListener::bind("0.0.0.0:3333").unwrap();
     let (bc_sender, bc_receiver) = mpsc::channel();
     thread::spawn(|| {
-            handle_broadcast(bc_receiver);
-        });
+        handle_broadcast(bc_receiver);
+    });
+
     for stream in listener.incoming() {
         let write_stream = stream.unwrap();
         let read_stream = write_stream.try_clone().unwrap();
@@ -30,8 +31,7 @@ pub fn run() {
     }
 }
 
-fn read_from_client(mut read_stream: TcpStream, 
-                    bc_sender: mpsc::Sender<BcMsg>) {
+fn read_from_client(mut read_stream: TcpStream, bc_sender: mpsc::Sender<BcMsg>) {
     loop {
         let mut buffer = [0;128];
         if let Ok(_) = read_stream.read(&mut buffer) {
@@ -44,8 +44,7 @@ fn read_from_client(mut read_stream: TcpStream,
     }
 }
 
-fn write_to_client(mut write_stream: TcpStream, 
-                   bc_receiver: mpsc::Receiver<String>) {
+fn write_to_client(mut write_stream: TcpStream, bc_receiver: mpsc::Receiver<String>) {
     loop {
         if let Ok(message) = bc_receiver.recv() {
             write_stream.write(message.as_bytes()).unwrap();
@@ -69,7 +68,7 @@ fn handle_broadcast(receiver: mpsc::Receiver<BcMsg>) {
                     }
                 });
             },
-            Err(_) => panic!("error receiving in bc thread"), 
+            Err(_) => panic!("error receiving in bc thread"),
         }
     }
 }
