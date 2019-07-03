@@ -1,6 +1,5 @@
 use std::thread;
-use std::net::TcpListener;
-use std::net::TcpStream;
+use std::net::{TcpListener, TcpStream, SocketAddrV4};
 use std::sync::mpsc;
 use std::io::prelude::*;
 
@@ -9,8 +8,8 @@ enum BcMsg {
     Broadcast(String),
 }
 
-pub fn run() {
-    let listener = TcpListener::bind("0.0.0.0:3333").unwrap();
+pub fn run(address: SocketAddrV4) {
+    let listener = TcpListener::bind(address).unwrap();
     let (bc_sender, bc_receiver) = mpsc::channel();
     thread::spawn(|| {
         handle_broadcast(bc_receiver);

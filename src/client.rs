@@ -1,11 +1,11 @@
 use std::thread;
 use std::io;
 use std::io::prelude::*;
-use std::net::TcpStream;
+use std::net::{TcpStream, SocketAddrV4};
 use std::char;
 
-pub fn run(name: String) {
-    let mut write_stream = TcpStream::connect("localhost:3333")
+pub fn run(name: String, address: SocketAddrV4) {
+    let mut write_stream = TcpStream::connect(address)
         .expect("Could not connect to server!");
     let read_stream = write_stream.try_clone().unwrap();
     let name_copy = name.clone();

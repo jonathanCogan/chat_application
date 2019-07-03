@@ -26,11 +26,14 @@ mod client;
 // stdout <---- thread2 <----|  |------ s_thread2 <-----|
 
 use structopt::StructOpt;
+use std::net::SocketAddrV4;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "chat", about = "A chat application")]
 struct Opt {
-    name: String
+    name: String,
+    #[structopt(long = "--address", short = "-a")]
+    address: SocketAddrV4,
 }
 
 /// Hello!
@@ -41,18 +44,11 @@ struct Opt {
 /// let x = 3;
 /// ```
 // Goodbye!
-pub fn main() {
+fn main() {
     let opt = Opt::from_args();
     if opt.name == "server" {
-        server::run();
+        server::run(opt.address);
     } else {
-        client::run(opt.name);
+        client::run(opt.name, opt.address);
     }
-}
-
-/// ```rust
-/// let x = 3;
-/// ```
-pub fn foo() {
-
 }
